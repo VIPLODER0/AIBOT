@@ -1,0 +1,87 @@
+name: 🤖 AI Telegram Bot
+
+on:
+  # Har 6 ghante mein auto start
+  schedule:
+    - cron: '0 */6 * * *'
+  
+  # Manual run ka option bhi hai
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Run karne ki wajah'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  run-bot:
+    name: Run Telegram Bot
+    runs-on: ubuntu-latest
+    timeout-minutes: 350  # ~5 hrs 50 min (GitHub limit 6hr hai)
+
+    steps:
+      # ── 1. Code checkout ──────────────────────────────────────
+      - name: 📥 Code Checkout
+        uses: actions/checkout@v4
+
+      # ── 2. Python setup ───────────────────────────────────────
+      - name: 🐍 Python 3.11 Setup
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      # ── 3. Dependencies install ───────────────────────────────
+      - name: 📦 Dependencies Install
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # ── 4. Config file banana (Secrets se) ───────────────────
+      - name: ⚙️ Config File Banana
+        run: |
+          cat > config.json << 'EOF'
+          {
+            "telegram_token": "${{ secrets.TELEGRAM_TOKEN }}",
+            "apis": {
+              "openai":   { "key": "${{ secrets.OPENAI_API_KEY }}",   "enabled": true },
+              "claude":   { "key": "${{ secrets.CLAUDE_API_KEY }}",   "enabled": true },
+              "gemini":   { "key": "${{ secrets.GEMINI_API_KEY }}",   "enabled": true },
+              "groq":     { "key": "${{ secrets.GROQ_API_KEY }}",     "enabled": true },
+              "mistral":  { "key": "${{ secrets.MISTRAL_API_KEY }}",  "enabled": true },
+              "together": { "key": "${{ secrets.TOGETHER_API_KEY }}", "enabled": true },
+              "cohere":   { "key": "${{ secrets.COHERE_API_KEY }}",   "enabled": true }
+            },
+            "default_provider": "${{ vars.DEFAULT_PROVIDER || 'openai' }}",
+            "default_model":    "${{ vars.DEFAULT_MODEL    || 'gpt-4o' }}",
+            "max_file_size_mb": 10
+          }
+          EOF
+          echo "✅ config.json ready!"
+
+      # ── 5. User settings restore (cache se) ──────────────────
+      - name: 💾 User Settings Restore
+        uses: actions/cache@v4
+        with:
+          path: user_settings.json
+          key: user-settings-${{ github.run_number }}
+          restore-keys: |
+            user-settings-
+
+      # ── 6. Bot run karo ───────────────────────────────────────
+      - name: 🚀 Bot Start Karo
+        run: |
+          echo "🤖 Bot start ho raha hai..."
+          echo "⏰ Time: $(date)"
+          python bot.py
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+
+      # ── 7. User settings save karo (restart ke baad bhi rahe) ─
+      - name: 💾 User Settings Save
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: user_settings.json
+          key: user-settings-${{ github.run_number }}
+          
