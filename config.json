@@ -1,5 +1,5 @@
 {
-  "telegram_token": "YOUR_TELEGRAM_BOT_TOKEN_HERE",
+  "telegram_token": "8223453766:AAGzRCb8DormlSVb9DNfjM5DUXCQ41lX-6w",
   "apis": {
     "openai":   { "key": "", "enabled": false },
     "claude":   { "key": "", "enabled": false },
