@@ -1,0 +1,15 @@
+{
+  "telegram_token": "YOUR_TELEGRAM_BOT_TOKEN_HERE",
+  "apis": {
+    "openai":   { "key": "", "enabled": false },
+    "claude":   { "key": "", "enabled": false },
+    "gemini":   { "key": "", "enabled": false },
+    "groq":     { "key": "", "enabled": false },
+    "mistral":  { "key": "", "enabled": false },
+    "together": { "key": "", "enabled": false },
+    "cohere":   { "key": "", "enabled": false }
+  },
+  "default_provider": "openai",
+  "default_model": "gpt-4o",
+  "max_file_size_mb": 10
+}
